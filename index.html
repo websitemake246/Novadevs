@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Nova Devs</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            background: linear-gradient(to right, #fdbb2d, #b21f1f);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .content {
+            display: none;
+        }
+        
+        .waiting-screen {
+            text-align: center;
+        }
+        
+        .logo {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #fdbb2d;
+        }
+        
+        .features {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            margin: 30px 0;
+        }
+        
+        .feature {
+            flex: 0 0 30%;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px;
+            text-align: center;
+        }
+        
+        .feature i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: #fdbb2d;
+        }
+        
+        .waiting-message {
+            font-size: 1.5rem;
+            margin: 20px 0;
+            color: #fdbb2d;
+        }
+        
+        .spinner {
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 5px solid #fdbb2d;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .admin-link {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 10px 15px;
+            border-radius: 5px;
+            color: white;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        
+        .admin-link:hover {
+            background: rgba(0, 0, 0, 0.9);
+        }
+        
+        @media (max-width: 768px) {
+            .feature {
+                flex: 0 0 100%;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🚀 Nova Devs</div>
+        
+        <div id="waiting-screen" class="waiting-screen">
+            <h1>Access Requested</h1>
+            <div class="spinner"></div>
+            <p class="waiting-message">Waiting for admin approval...</p>
+            <p>Your request has been sent to the administrator. You'll be granted access once approved.</p>
+            <p><small>Your IP: <span id="user-ip">Loading...</span></small></p>
+        </div>
+        
+        <div id="content" class="content">
+            <h1>Welcome to Nova Devs</h1>
+            <p>We build innovative digital solutions that transform businesses and create exceptional user experiences.</p>
+            
+            <div class="features">
+                <div class="feature">
+                    <i>💻</i>
+                    <h3>Web Development</h3>
+                    <p>Custom websites and web applications tailored to your needs.</p>
+                </div>
+                <div class="feature">
+                    <i>📱</i>
+                    <h3>Mobile Apps</h3>
+                    <p>iOS and Android applications with stunning UI/UX design.</p>
+                </div>
+                <div class="feature">
+                    <i>☁️</i>
+                    <h3>Cloud Solutions</h3>
+                    <p>Scalable cloud infrastructure and deployment services.</p>
+                </div>
+            </div>
+            
+            <div style="margin-top: 30px;">
+                <h2>Our Services</h2>
+                <p>From concept to deployment, we deliver cutting-edge solutions that drive results.</p>
+            </div>
+        </div>
+    </div>
+    
+    <a href="/admin" class="admin-link">Admin Panel</a>
+
+    <script>
+        // Check access status
+        async function checkAccess() {
+            try {
+                const response = await fetch('/api/check-access');
+                const data = await response.json();
+                
+                if (data.approved) {
+                    // Access granted
+                    document.getElementById('waiting-screen').style.display = 'none';
+                    document.getElementById('content').style.display = 'block';
+                } else {
+                    // Access pending - continue showing waiting screen
+                    setTimeout(checkAccess, 5000); // Check again in 5 seconds
+                }
+            } catch (error) {
+                console.error('Error checking access:', error);
+                setTimeout(checkAccess, 10000); // Check again in 10 seconds on error
+            }
+        }
+        
+        // Get user IP (simulated - real IP is handled by server)
+        document.getElementById('user-ip').textContent = 'Detecting...';
+        
+        // Start checking access
+        checkAccess();
+    </script>
+</body>
+</html>

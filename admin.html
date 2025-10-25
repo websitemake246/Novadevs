@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Nova Devs</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #2d1b69);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #fdbb2d, #b21f1f);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .login-section {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            padding: 30px;
+            max-width: 400px;
+            margin: 50px auto;
+            text-align: center;
+        }
+        
+        .admin-panel {
+            display: none;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            padding: 20px;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            flex: 1;
+            margin: 0 10px;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #fdbb2d;
+        }
+        
+        .requests-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .request-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .request-info {
+            flex-grow: 1;
+        }
+        
+        .request-actions button {
+            margin-left: 10px;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .approve-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .decline-btn {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        button {
+            background: linear-gradient(to right, #fdbb2d, #b21f1f);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: transform 0.3s;
+            margin: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .notification.success {
+            background-color: #4CAF50;
+        }
+        
+        .notification.error {
+            background-color: #f44336;
+        }
+        
+        .notification.show {
+            opacity: 1;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #fdbb2d;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 Nova Devs - Admin Panel</h1>
+            <p>Manage website access requests</p>
+        </header>
+        
+        <div id="login-section" class="login-section">
+            <h2>Admin Login</h2>
+            <input type="password" id="admin-password" placeholder="Enter admin password">
+            <button onclick="login()">Login</button>
+            <div id="login-error" style="color: #f44336; margin-top: 10px; display: none;">
+                Invalid password
+            </div>
+        </div>
+        
+        <div id="admin-panel" class="admin-panel">
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="pending-count">0</div>
+                    <div>Pending Requests</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="approved-count">0</div>
+                    <div>Approved Today</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="total-count">0</div>
+                    <div>Total Requests</div>
+                </div>
+            </div>
+            
+            <h2>Pending Access Requests</h2>
+            <div class="requests-list" id="requests-list">
+                <!-- Requests will be populated here -->
+            </div>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <button onclick="clearAllRequests()">Clear All Requests</button>
+            </div>
+            
+            <a href="/" class="back-link">← Back to Website</a>
+        </div>
+    </div>
+    
+    <div id="notification" class="notification"></div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        let socket = null;
+        
+        // Show notification
+        function showNotification(message, type) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Admin login
+        async function login() {
+            const password = document.getElementById('admin-password').value;
+            
+            try {
+                // Join admin room via socket
+                socket = io();
+                socket.emit('admin-join', password);
+                
+                // Load initial requests
+                const response = await fetch('/api/admin/requests');
+                if (response.ok) {
+                    document.getElementById('login-section').style.display = 'none';
+                    document.getElementById('admin-panel').style.display = 'block';
+                    loadRequests();
+                } else {
+                    document.getElementById('login-error').style.display = 'block';
+                }
+            } catch (error) {
+                document.getElementById('login-error').style.display = 'block';
+            }
+        }
+        
+        // Load requests from server
+        async function loadRequests() {
+            try {
+                const response = await fetch('/api/admin/requests');
+                const requests = await response.json();
+                renderRequests(requests);
+            } catch (error) {
+                console.error('Error loading requests:', error);
+            }
+        }
+        
+        // Render requests list
+        function renderRequests(requests) {
+            const requestsList = document.getElementById('requests-list');
+            const pendingCount = document.getElementById('pending-count');
+            
+            pendingCount.textContent = requests.length;
+            
+            if (requests.length === 0) {
+                requestsList.innerHTML = '<p style="text-align: center; padding: 20px;">No pending requests</p>';
+                return;
+            }
+            
+            requestsList.innerHTML = '';
+            
+            requests.forEach(request => {
+                const requestItem = document.createElement('div');
+                requestItem.className = 'request-item';
+                requestItem.innerHTML = `
+                    <div class="request-info">
+                        <strong>IP: ${request.ip}</strong><br>
+                        <small>User Agent: ${request.userAgent}</small><br>
+                        <small>Requested: ${new Date(request.timestamp).toLocaleString()}</small>
+                    </div>
+                    <div class="request-actions">
+                        <button class="approve-btn" onclick="approveRequest('${request.ip}')">Approve</button>
+                        <button class="decline-btn" onclick="declineRequest('${request.ip}')">Decline</button>
+                    </div>
+                `;
+                
+                requestsList.appendChild(requestItem);
+            });
+        }
+        
+        // Approve request
+        async function approveRequest(ip) {
+            const password = document.getElementById('admin-password').value;
+            
+            try {
+                const response = await fetch('/api/admin/action', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'approve',
+                        ip: ip,
+                        password: password
+                    })
+                });
+                
+                if (response.ok) {
+                    showNotification(`Access approved for ${ip}`, 'success');
+                    loadRequests(); // Reload requests
+                } else {
+                    showNotification('Error approving request', 'error');
+                }
+            } catch (error) {
+                showNotification('Error approving request', 'error');
+            }
+        }
+        
+        // Decline request
+        async function declineRequest(ip) {
+            const password = document.getElementById('admin-password').value;
+            
+            try {
+                const response = await fetch('/api/admin/action', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'decline',
+                        ip: ip,
+                        password: password
+                    })
+                });
+                
+                if (response.ok) {
+                    showNotification(`Access declined for ${ip}`, 'success');
+                    loadRequests(); // Reload requests
+                } else {
+                    showNotification('Error declining request', 'error');
+                }
+            } catch (error) {
+                showNotification('Error declining request', 'error');
+            }
+        }
+        
+        // Clear all requests
+        async function clearAllRequests() {
+            if (confirm('Are you sure you want to clear all pending requests?')) {
+                // This would need to be implemented on the server side
+                showNotification('Feature not implemented yet', 'error');
+            }
+        }
+        
+        // Socket.io event listeners for real-time updates
+        if (socket) {
+            socket.on('new-request', (request) => {
+                showNotification(`New access request from ${request.ip}`, 'success');
+                loadRequests(); // Reload requests
+            });
+            
+            socket.on('initial-requests', (requests) => {
+                renderRequests(requests);
+            });
+        }
+        
+        // Allow login with Enter key
+        document.getElementById('admin-password').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                login();
+            }
+        });
+    </script>
+</body>
+</html>
